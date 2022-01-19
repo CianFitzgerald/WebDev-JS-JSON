@@ -1,0 +1,106 @@
+/*--body styling---*/
+body{
+    height:100%;
+    position: relative
+
+}
+
+
+/*--header styling---*/
+.header {
+  background-color: lightgoldenrodyellow;
+  font-size: 3vw;
+  color: black;
+  text-align: center;
+  font-family: Charcoal, serif;
+  padding: 1px;
+  border: 2px solid black;  
+}
+
+
+/*--sub header styling---*/
+.subhead{
+    font-size: 20px;
+}
+
+
+/*--background and font styling for the selection tools of the webpage---*/
+div.selection{
+  background-color: aliceblue;
+  padding:3%;
+  border: 2px solid black;  
+  font-family: serif;
+  border-top: 5px solid black
+    
+}
+
+
+/*--text alignment and sizing of the selection tools---*/
+div.date-container, div.slot-container, div.radio-container,div.day-container {
+    text-align: center;
+    font-size: 24px;
+    padding-bottom: 5px;
+
+}
+
+
+/*--font styling for the drop down menus and submit button---*/
+#date-dropdown, #slot-dropdown, #submit-button-style{
+    font-size: 18px;
+    font-family: serif;
+}
+
+/*--background coloring and border styling for the main section of the webpage---*/
+div.main-body{
+  background-color: azure;
+  border: 2px solid black;
+
+}
+
+
+/*--font sizing and styling for the main output container---*/
+div.output-container{
+  padding-left: 5px;
+  font-size: 20px;
+  font-family:serif;
+}
+
+
+/*--Styling for the break between the sessions, referenced from https://www.geeksforgeeks.org/how-to-change-the-height-of-br-tag/ I wanted to produce a bigger break to reduce cluttering the page and making the display more user friendly---*/
+.br { 
+    display: block; 
+    margin-bottom: 2em; 
+    }
+
+
+/*---styling for the lines between the output for each session, referenced from https://www.wikihow.com/Insert-a-Line-in-HTML#:~:text=Type%20anywhere%20in%20the,hr%3E%20tag%20in%20your%20HTML. once again this was to reduce clutter and make the webpage more readable ---*/
+
+.hr{
+    height: 2px;
+    background-color: black;
+    margin-right: auto;
+}
+
+/*---footer styling---*/
+footer
+{
+  background-color:lightgoldenrodyellow;
+  padding:10px 0 10px;
+  font-size:20px;
+  line-height:25px;
+  color: black;
+  position:inherit;
+  bottom: 0;
+  width: 99.%;
+  border: 2px solid black;   
+
+}
+
+/*copyright text positioning*/
+
+.copyright-text
+{
+  padding-left: 15px;
+  margin:0;
+}
+

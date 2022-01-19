@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="assignment2_style.css">        
+</head>      
+     
+<body>
+<div id="page-container">
+
+<!-- The webpage header-->
+<header>
+    <div class="header">
+    <h1>2020 ACM Conference</h1> 
+    <p class="subhead">Schedule of CHI'20 Human Factors in Computing Systems.</p>
+    </div>
+</header>
+    
+<!-- Creating Divs for each component of the script--> 
+    <div id="main">
+        <div class="selection">
+            <div id="date-container" class="date-container"></div>
+            <div id="slot-container" class="slot-container"></div>
+            <div id="radio-container" class="radio-container"></div>
+            <div id="day-container" class="day-container"></div>  
+        </div>
+        
+        <div class="main-body">
+            <div id="output-container" class="output-container"></div>
+        </div>
+    </div>
+    
+<!-- Footer html -->
+<footer class="footer">      
+<div class="row">    
+    <p class="copyright-text">Copyright &copy; 2020 All Rights Reserved by 
+             <a href="schedule.html">ACM</a>.
+    </p>
+</div>
+</footer>
+</div> 
+<script>
+    
+//Parsing the JSON file and passing it into the two date and slot selector functions
+    var xmlhttp = new XMLHttpRequest();
+    var url = "scheduling.json";
+    var JSONschedule
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+            //Parse the JSON data to a JavaScript variable. 
+            JSONschedule = JSON.parse(xmlhttp.responseText);   
+            Select_date(JSONschedule)
+            Select_slot(JSONschedule)
+        }
+    }
+
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+    
+    
+    function Select_date(arr) {
+
+        // Extracting the data object from the root object.
+        var out = "<label for='dates'>Choose a date: </label>" 
+        + "<select name = 'dates-list' id='date-dropdown' onchange='Select_slot()'>"
+        + "<option value='' disabled selected>select date</option><br>";
+        
+        var i;
+        
+        // iterating through the array and populating the date dropdown menu with the day and dates from the JSON file, I took a substring of the date element to just display the dd part of yyyy-mm-dd. 
+        for (i=0; i <arr.length; i++) {    
+            out += "<option value= " + arr[i].date +"> "+ arr[i].day +" "+ arr[i].date.substring(8,10)+'th April' + '</option><br>';
+        }  
+        out += "</select>";
+        document.getElementById("date-container").innerHTML = out;
+
+    }
+  
+    function Select_slot(){
+        
+        //creating variable of the date selected from the dropdown menu
+        var selected_date = document.getElementById('date-dropdown').value;
+        if (selected_date == ''){
+            return;
+        }
+        var out = "<label for='slots'>Choose a time slot: </label>" 
+        + "<select name = 'slots-list' id='slot-dropdown'>" + 
+        "<option value='all' selected> full day schedule</option><br>";
+        
+        //iterating through the array of slots for which the date was selected and populating another dropdown menu with the slot times for each day.
+        for (var i=0; i <JSONschedule.length; i++){
+            if (selected_date == JSONschedule[i].date){
+                var slot_key = Object.keys(JSONschedule[i].slots);
+                for (var j=0; j <slot_key.length; j++){
+                    out += "<option value="+JSONschedule[i].slots[slot_key[j]].startTime +
+                    ">" + JSONschedule[i].slots[slot_key[j]].time +
+                    "</option><br>"
+                }
+            }
+        }
+        
+        //creating a submit button
+        out += "</select>";
+        out += "<button id='submit-button-style' onclick='submit()'>Submit</button>";
+        
+        document.getElementById("slot-container").innerHTML = out;
+        
+        //creating a variable for the radio button and the various options, assigning each option a specific value which will be used later to filter
+        var type = "Choose a session type:<input type='radio' id='alltypes' name='type' value='all' onclick='submit()' checked>All" +
+                "<input type='radio' id='papertype' name='type' value='paper' onclick='submit()'>Paper" +
+                "<input type='radio' id='nopapertype' name='type' value='nopaper' onclick='submit()'>Other";
+        document.getElementById("radio-container").innerHTML = type; 
+    }
+  
+    function submit(){   
+        // creating variables for the selected slot and date.
+        var selected_slot = document.getElementById('slot-dropdown').value;
+        var selected_date = document.getElementById('date-dropdown').value;
+        
+        //creating variable for the type selected based on which option the user chooses
+        if(document.getElementById('alltypes').checked) { 
+            var typeselected = 'alltypes'; 
+        }
+        else if(document.getElementById('papertype').checked) { 
+            var typeselected = 'papertype'; 
+        }
+        else if(document.getElementById('nopapertype').checked) { 
+            var typeselected = 'nopapertype'; 
+        }
+        
+        //printing out the day selected based on the date selected, this is done by iterating through the first level of the JSON file and returning the value of day if the date selected is equal to the date in the JSON file.
+        var day = '';
+
+        for (var i=0; i <JSONschedule.length; i++){   
+            if (selected_date == JSONschedule[i].date){
+            day += "<p>Day of session: <b>" + JSONschedule[i].day + " </b></p>"
+            }       
+        document.getElementById("day-container").innerHTML = day;
+        }
+        
+        //empty variable for output of main section of the webpage
+        var out = '';
+        
+        //iterating through first level of JSON file to find the relevant slot
+        for (var i=0; i <JSONschedule.length; i++){
+            
+            // creating a variable for the slots that creates an array of strings that represent all the enumerable properties of the given object.
+            var slot_key = Object.keys(JSONschedule[i].slots);
+            
+            //iterating through the slots 
+            for (var j=0; j <slot_key.length; j++){
+                    
+                    //creating a variable for the sessions that creates an array of strings that represent all the enumerable properties of the given object.
+                    var session_key = Object.keys(JSONschedule[i].slots[slot_key[j]].sessions)
+
+                    //iterating through the sessions
+                    for (var k=0; k<session_key.length; k++){   
+
+                        //creating variable key for the submissions that creates an array of strings that represent all the enumerable properties of the given object.
+                        var submission_key = Object.keys(JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions)
+
+                        //iterating through the submissions
+                        for (var l=0; l<submission_key.length; l++){    
+
+                            //if slot selected is not for the full day schedule this block of code will run                     
+                            if (selected_slot !== 'all'){
+
+                                //if the radio button for all types of session is chosen this section will be executed
+                                if(typeselected == 'alltypes'){
+
+                                    //if the slot selected is equal to the the start time within the JSON file then the following if statement is executed and all the required data from this time slot will be retrieved and used to populate the webpage.
+                                    if (selected_slot == JSONschedule[i].slots[slot_key[j]].startTime){
+
+                                        //this block of code is repeated below after each if statement therefore I will describe it once
+                                        
+                                        //The first line outputs the relevant session titles
+                                        out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+
+                                        //this outputs the start time of the session, the start time is not explicitly given in the JSON file so I got a substring of the time slot that retrieves just the start time.
+                                        out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+
+                                        //this outputs the location of the session
+                                        out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+
+                                        //this outputs the type of session
+                                        out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+
+                                        //to create a more information button I used the details and summary tags, referenced from W3 schools https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_details 
+                                        //the title of the submissions is retrieved from the inner most section of the JSON file
+                                        out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+
+                                        //The doiURL is retrieved also and displayed within the more information button.
+                                        //code referenced from this website for the use of the hr tag https://www.wikihow.com/Insert-a-Line-in-HTML#:~:text=Type%20anywhere%20in%20the,hr%3E%20tag%20in%20your%20HTML. span tag reference
+                                        out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+                                    }                                                                       
+                                }
+
+                                //if the radio button option for paper is selected then the following if statement is executed
+                                else if (typeselected == 'papertype'){
+
+                                    //if the selected slot time is equal to that in the JSON file and if the session type is paper then this if staement is executed
+                                    if (selected_slot == JSONschedule[i].slots[slot_key[j]].startTime && JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type == 'paper')
+                                        
+                                    //same block of code as above
+                                    {
+
+                                        
+                                        out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+                                        out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+                                        out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+                                        out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+                                        out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+                                        out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+                                    }
+                                }
+
+                                //type selected is no paper (other
+                                else if (typeselected == 'nopapertype'){
+                                    //if the selected slot time is equal to that in the JSON file and if the session type is not equal to paper then this if staement is executed
+                                    if (selected_slot == JSONschedule[i].slots[slot_key[j]].startTime && JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type !== 'paper')
+                                        
+                                    //same block of code as above 
+                                    {
+
+
+                                                                                   
+                                        out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+                                        out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+                                        out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+                                        out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+                                        out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+                                        out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+                                    }
+                                }
+                            }
+
+                            //else if the full day schedule is chosen then the following if statement is executed
+                            else if (selected_slot == 'all'){
+
+                                //the first ten characters of the start time string in the JSON file contains the date selected, therefore if the selected date from the dropdown menu is equal to the first 10 characters the full day will be displayed as this substring is common to the entire day. 
+                                if(selected_date == JSONschedule[i].slots[slot_key[j]].startTime.substring(0,10) && typeselected == 'alltypes')
+                                
+                                    //same block of code as above 
+                                    {
+
+
+                                            out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+                                            out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+
+                                            out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+                                            out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+                                            out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+                                            out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+}
+
+
+                                //same as above but only executes for sessions of type paper
+                                else if (selected_date == JSONschedule[i].slots[slot_key[j]].startTime.substring(0,10) && typeselected == 'papertype'){
+                                    if (JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type == 'paper')  
+                                        
+                                    //same block of code as above    
+                                    {
+
+                                                                                             
+                                        out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+                                        out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+
+                                        out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+                                        out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+                                        out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+                                        out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+                                    }
+
+                                }
+
+
+                                //same as above but only executes for sessions of type not equal to paper (other)
+                                else if (selected_date == JSONschedule[i].slots[slot_key[j]].startTime.substring(0,10) && typeselected == 'nopapertype'){
+                                    if (JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type !== 'paper') 
+                                        
+                                    //same block of code as above                
+                                    {
+
+
+                                      
+                                        out += "<p><b>Session title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].title + "</p>"
+                                        out += "<p><b>Start time of session:</b>  " + JSONschedule[i].slots[slot_key[j]].time.substring(0,5) + "</p>"
+                                        out += "<p><b>Location (room) of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].room + "</p>"
+                                        out += "<p><b>Type of session:</b>  " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].type + "</p>"
+                                        out += "<details><summary><b>More Information on this session</b> </b></summary><p><b>Submission Title:</b> " + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].title + "</p>" 
+                                        out += '<p><a href="' + JSONschedule[i].slots[slot_key[j]].sessions[session_key[k]].submissions[submission_key[l]].doiUrl + '" target="_blank" ><b>More information on this submission here.</b></a></p></details><span class="br"></span><hr class="hr">'
+                            }
+                        }
+                    }        
+                }
+            }
+        }
+    }
+    
+        //error handling: if the out variable is empty i.e if there are no particular slots or session types, then an error message will appear to tell the user that there are no slots filling that criteria.
+        if(out !== ''){
+            document.getElementById("output-container").innerHTML = out;
+        }
+        else {
+            var errorString = "Sorry, there's nothing that fills this criteria"
+            document.getElementById("output-container").innerHTML = errorString;
+        }
+    }
+    
+</script>
+</body>
+</html>
+
+    
